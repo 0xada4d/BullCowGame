@@ -37,7 +37,7 @@ public:
 	
 
 	// counts bulls and cows, and increasing try number assuming valid guess
-	FBullCowCount SubmitGuess(FString); 
+	FBullCowCount SubmitValidGuess(FString); 
 
 private:
 	// See constructor for initialization
