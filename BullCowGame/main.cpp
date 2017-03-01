@@ -9,7 +9,7 @@ user interaction. For game logic see the FBullCowGame class.
 #include <string>
 #include "FBullCowGame.h"
 
-using FText = std::string; 
+using FText = std::string;
 using int32 = int; 
 
 void PrintIntro(); 
@@ -79,26 +79,26 @@ FText GetValidGuess()
 	do {
 		// Get guess from player 
 		int32 CurrentTry = BCGame.GetCurrentTry();
-		std::cout << "Try " << CurrentTry << ". Enter your guess: ";
+		std::cout << "Try " << CurrentTry << " of " << BCGame.GetMaxTries();
+		std::cout << ". Enter your guess: ";
 		std::getline(std::cin, Guess);
 
 		Status = BCGame.CheckGuessValidity(Guess);
 		switch (Status)
 		{
 		case EGuessStatus::Incorrect_Length:
-			std::cout << "Please enter a " << BCGame.GetHiddenWordLength() << " letter word.\n";
+			std::cout << "Please enter a " << BCGame.GetHiddenWordLength() << " letter word.\n\n";
 			break;
 		case EGuessStatus::Not_Isogram:
-			std::cout << "Word entered was not an isogram!\n";
+			std::cout << "Word entered was not an isogram!\n\n";
 			break;
 		case EGuessStatus::Not_Lowercase:
-			std::cout << "Please input only lowercase letters.\n";
+			std::cout << "Please enter only lowercase letters.\n\n";
 			break;
 		default:
 			// If it makes it here, assume Guess is valid
 			break;
 		}
-		std::cout << std::endl;
 	} while (Status != EGuessStatus::OK); // Keep looping until input is valid
 
 	return Guess;

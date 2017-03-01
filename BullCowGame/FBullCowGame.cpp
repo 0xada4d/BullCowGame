@@ -12,18 +12,23 @@ FBullCowGame::FBullCowGame()
 	Reset(); // Does the job of the constructor, resetting the game
 }
 
-int32 FBullCowGame::GetMaxTries() const { return MyMaxTries; }
+
 int32 FBullCowGame::GetCurrentTry() const { return MyCurrentTry; }
 int32 FBullCowGame::GetHiddenWordLength() const { return MyHiddenWord.length(); }
 bool FBullCowGame::IsGameWon() const { return bGameIsWon; }
 
+int32 FBullCowGame::GetMaxTries() const 
+{ 
+	TMap<int32, int32> WordLengthToMaxTries
+	{ 
+		{3, 4}, {4, 5}, {5, 7}, {6, 10}, {7, 12}, {8, 15}
+	};
+	return WordLengthToMaxTries[MyHiddenWord.length()];
+}
 
 void FBullCowGame::Reset()
 {
-	constexpr int32 MAX_TRIES = 8; // Use name for easier management
-	MyMaxTries = MAX_TRIES;
-
-	const FString HIDDEN_WORD = "aaaaaaa"; 
+	const FString HIDDEN_WORD = "planet"; // LENGTH must be between 3 - 8 letters!
 	MyHiddenWord = HIDDEN_WORD; 
 	MyCurrentTry = 1;
 	bGameIsWon = false;
@@ -40,7 +45,7 @@ EGuessStatus FBullCowGame::CheckGuessValidity(FString Guess) const
 	{
 		return EGuessStatus::Not_Isogram;
 	}
-	else if (false)
+	else if (!IsLowerCase(Guess))
 	{
 		return EGuessStatus::Not_Lowercase; // if the guess is not lowercase, return error
 	}
@@ -111,13 +116,35 @@ bool FBullCowGame::IsIsogram(FString Word) const
 	// set up our map
 	TMap<char, bool> LetterSeen;
 
-	// Loop through all letters,
-		// if the letter is in the map
-			// we do not have an isogram
-		// otherwise
-			// add letter to map
+	for (auto Letter : Word) // Loop through all letters
+	{
+		Letter = tolower(Letter);
+		if (LetterSeen[Letter]) // if the letter is in the map
+		{
+			return false;	// we do not have an isogram
+		}
+		else
+		{
+			LetterSeen[Letter] = true;	// otherwise add letter to map
+		}
+	}
+			
+	return true; // in case where \0 is entered
+}
 
-	return true; // in case where /0 is entered
+bool FBullCowGame::IsLowerCase(FString Word) const
+{
+	if (Word.length() == 0) { return true; }
+
+	for (auto Letter : Word)
+	{
+		if (!islower(Letter))
+		{
+			return false;
+		}
+	}
+
+	return true;
 }
 
 
