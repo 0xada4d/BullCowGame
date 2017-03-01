@@ -27,7 +27,7 @@ void FBullCowGame::Reset()
 }
 
 bool FBullCowGame::IsGameWon() const
-{
+{ 
 	return false;
 }
 
