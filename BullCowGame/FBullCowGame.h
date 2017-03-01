@@ -28,9 +28,9 @@ public:
 	int32 GetMaxTries() const; // const at end of declaration prevents--
 	int32 GetCurrentTry() const;  // function from modifying variables of object
 	int32 GetHiddenWordLength() const;
-
-	EGuessStatus CheckGuessValidity(FString) const;
 	bool IsGameWon() const;
+	EGuessStatus CheckGuessValidity(FString) const;
+	
 
 	// TODO Make a richer return value
 	void Reset();
@@ -43,5 +43,8 @@ private:
 	// See constructor for initialization
 	int32 MyCurrentTry;
 	int32 MyMaxTries;
-	FString MyHiddenWord; 
+	FString MyHiddenWord;
+	bool bGameIsWon;
+
+	bool IsIsogram(FString) const; 
 };

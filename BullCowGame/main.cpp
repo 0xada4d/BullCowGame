@@ -14,6 +14,7 @@ using int32 = int;
 
 void PrintIntro(); 
 void PlayGame();
+void PrintGameSummary();
 FText GetValidGuess();
 bool AskToPlayAgain(); 
 
@@ -38,7 +39,7 @@ int main()
 void PrintIntro()
 {
 	// Introduce game
-	std::cout << "This is the bullcow game, a fun word game!\n";
+	std::cout << "\n\nThis is the bullcow game, a fun word game!\n";
 	std::cout << "Can you guess the " << BCGame.GetHiddenWordLength();
 	std::cout << " letter isogram I'm thinking of??\n";
 	std::cout << std::endl;
@@ -51,9 +52,9 @@ void PlayGame()
 	BCGame.Reset(); 
 	int32 MaxTries = BCGame.GetMaxTries(); 
 
-	// Loop for the number of turns asking for guesses
-	// TODO change from FOR to WHILE once we are validating tries
-	for (int32 count = 0; count < MaxTries; count++)
+	// Loop asking for guesses while the game is not won
+	// and there are still tries remaining
+	while (!BCGame.IsGameWon() && BCGame.GetCurrentTry() <= MaxTries)
 	{
 		FText Guess = GetValidGuess(); // TODO make loop checking valid
 				
@@ -64,7 +65,7 @@ void PlayGame()
 		std::cout << ". Cows = " << BullCowCount.Cows << ".\n\n";
 	}
 
-	// TODO add a game summary
+	PrintGameSummary();
 
 	return; 
 }
@@ -108,12 +109,23 @@ FText GetValidGuess()
 bool AskToPlayAgain()
 {
 	// Ask player if he/she wants to continue
-	std::cout << "Do you want to play again? (y/n) ";
+	std::cout << "Do you want to play again with the same hidden word? (y/n) ";
 	FText Response = ""; 
 	std::getline(std::cin, Response); 
 
 	return (Response[0] == 'Y' || Response[0] == 'y');  
 }
 
+void PrintGameSummary()
+{
+	if (BCGame.IsGameWon())
+	{
+		std::cout << "WELL DONE - YOU WIN!!\n\n";
+	} 
+	else
+	{
+		std::cout << "Better luck next time!\n\n";
+	}
+}
 
 

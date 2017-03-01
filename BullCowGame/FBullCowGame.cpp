@@ -1,5 +1,9 @@
 
 #include "FBullCowGame.h"
+#include <map>
+#define TMap std::map
+
+
 using int32 = int; 
 
 
@@ -11,6 +15,7 @@ FBullCowGame::FBullCowGame()
 int32 FBullCowGame::GetMaxTries() const { return MyMaxTries; }
 int32 FBullCowGame::GetCurrentTry() const { return MyCurrentTry; }
 int32 FBullCowGame::GetHiddenWordLength() const { return MyHiddenWord.length(); }
+bool FBullCowGame::IsGameWon() const { return bGameIsWon; }
 
 
 void FBullCowGame::Reset()
@@ -18,41 +23,38 @@ void FBullCowGame::Reset()
 	constexpr int32 MAX_TRIES = 8; // Use name for easier management
 	MyMaxTries = MAX_TRIES;
 
-	const FString HIDDEN_WORD = "planet"; 
+	const FString HIDDEN_WORD = "aaaaaaa"; 
 	MyHiddenWord = HIDDEN_WORD; 
-
 	MyCurrentTry = 1;
+	bGameIsWon = false;
 	
 	return; 
 }
 
-bool FBullCowGame::IsGameWon() const
-{ 
-	return false;
-}
+
 
 EGuessStatus FBullCowGame::CheckGuessValidity(FString Guess) const
 {
-	// if the guess is not isogram
-	if (false)
+	
+	if (!IsIsogram(Guess))
 	{
 		return EGuessStatus::Not_Isogram;
 	}
 	else if (false)
 	{
-		return EGuessStatus::Not_Isogram;
+		return EGuessStatus::Not_Lowercase; // if the guess is not lowercase, return error
 	}
 	else if (Guess.length() != GetHiddenWordLength())
 	{
-		return EGuessStatus::Incorrect_Length;
+		return EGuessStatus::Incorrect_Length; // if length is wrong, return error
 	}
 	else
 	{
-		return EGuessStatus::OK;
+		return EGuessStatus::OK; // otherwise return ok
 	}
-	// if the guess is not lowercase, return error
-	// if length is wrong, return error
-	// otherwise return ok
+	
+	
+	
 }
 
 // Recieves valid guess, increments turn, and returns count
@@ -87,6 +89,35 @@ FBullCowCount FBullCowGame::SubmitValidGuess(FString Guess)
 			}
 		}
 	}
+
+	if (BullCowCount.Bulls == WordLength) 
+	{
+		bGameIsWon = true;
+		
+	} 
+	else 
+	{
+		bGameIsWon = false;
+	}
 		
 	return BullCowCount;
 }
+
+bool FBullCowGame::IsIsogram(FString Word) const
+{
+	// Treat 0 and 1 letter strings as isograms
+	if (Word.length() < 2) { return 1; }
+
+	// set up our map
+	TMap<char, bool> LetterSeen;
+
+	// Loop through all letters,
+		// if the letter is in the map
+			// we do not have an isogram
+		// otherwise
+			// add letter to map
+
+	return true; // in case where /0 is entered
+}
+
+
