@@ -17,6 +17,22 @@ int32 FBullCowGame::GetCurrentTry() const { return MyCurrentTry; }
 int32 FBullCowGame::GetHiddenWordLength() const { return MyHiddenWord.length(); }
 bool FBullCowGame::IsGameWon() const { return bGameIsWon; }
 
+
+// PrintIntro function asks for a number,
+// Sends number to SetHiddenWord,
+// Maps the number to a word in the hashmap, and sets that word as the hidden word
+void FBullCowGame::SetHiddenWord(int32 WordLength)
+{
+	TMap<int32, FString> WordLengthToWord
+	{
+		{ 3, "ant" },{ 4, "cats" },
+		{ 5, "grasp" },{ 6, "planet" },
+		{ 7, "talking" },{ 8, "brandish" }
+	};
+
+	MyHiddenWord = WordLengthToWord[WordLength];
+}
+
 int32 FBullCowGame::GetMaxTries() const 
 { 
 	TMap<int32, int32> WordLengthToMaxTries
@@ -26,10 +42,12 @@ int32 FBullCowGame::GetMaxTries() const
 	return WordLengthToMaxTries[MyHiddenWord.length()];
 }
 
+
+
+
+
 void FBullCowGame::Reset()
 {
-	const FString HIDDEN_WORD = "planet"; // LENGTH must be between 3 - 8 letters!
-	MyHiddenWord = HIDDEN_WORD; 
 	MyCurrentTry = 1;
 	bGameIsWon = false;
 	

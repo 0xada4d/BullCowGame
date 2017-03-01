@@ -12,7 +12,7 @@ user interaction. For game logic see the FBullCowGame class.
 using FText = std::string;
 using int32 = int; 
 
-void PrintIntro(); 
+void PrintIntroAndSetWord(); 
 void PlayGame();
 void PrintGameSummary();
 FText GetValidGuess();
@@ -25,7 +25,7 @@ int main()
 {
 	bool bPlayAgain = false; 
 	do {
-		PrintIntro();
+		PrintIntroAndSetWord();
 		PlayGame();
 		bPlayAgain = AskToPlayAgain(); 
 	} 
@@ -36,11 +36,16 @@ int main()
 
 
 
-void PrintIntro()
+void PrintIntroAndSetWord()
 {
 	// Introduce game
 	std::cout << "\n\nThis is the bullcow game, a fun word game!\n";
-	std::cout << "Can you guess the " << BCGame.GetHiddenWordLength();
+	int32 WordLength;
+	std::cout << "Pick a number, 3 - 8: ";
+	std::cin >> WordLength;
+	BCGame.SetHiddenWord(WordLength); // TODO make sure input is valid, between 3 and 8
+	std::cin.get();
+	std::cout << "Can you guess the " << WordLength;
 	std::cout << " letter isogram I'm thinking of??\n";
 	std::cout << std::endl;
 	return;
@@ -109,7 +114,7 @@ FText GetValidGuess()
 bool AskToPlayAgain()
 {
 	// Ask player if he/she wants to continue
-	std::cout << "Do you want to play again with the same hidden word? (y/n) ";
+	std::cout << "Do you want to play again? (y/n) ";
 	FText Response = ""; 
 	std::getline(std::cin, Response); 
 

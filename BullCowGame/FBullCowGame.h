@@ -31,11 +31,10 @@ public:
 	bool IsGameWon() const;
 	EGuessStatus CheckGuessValidity(FString) const;
 	
-
-	// TODO Make a richer return value
-	void Reset();
+	void SetHiddenWord(int32); // Player indirectly chooses the hidden word based on number
+	void Reset(); // TODO Make a richer return value
 	
-
+	
 	// counts bulls and cows, and increasing try number assuming valid guess
 	FBullCowCount SubmitValidGuess(FString); 
 
