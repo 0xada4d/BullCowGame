@@ -39,14 +39,30 @@ int main()
 void PrintIntroAndSetWord()
 {
 	// Introduce game
-	std::cout << "\n\nThis is the bullcow game, a fun word game!\n";
+	std::cout << "Welcome to Bulls and Cows, a fun word game.\n";
+	std::cout << std::endl;
+	std::cout << "          }   {         ___ " << std::endl;
+	std::cout << "          (o o)        (o o) " << std::endl;
+	std::cout << "   /-------\\ /          \\ /-------\\ " << std::endl;
+	std::cout << "  / | BULL |O            O| COW  | \\ " << std::endl;
+	std::cout << " *  |-,--- |              |------|  * " << std::endl;
+	std::cout << "    ^      ^              ^      ^ " << std::endl;
+	std::cout << std::endl;
 	int32 WordLength;
 	std::cout << "Pick a number, 3 - 8: ";
 	std::cin >> WordLength;
+	std::cout << "\n";
 	BCGame.SetHiddenWord(WordLength); // TODO make sure input is valid, between 3 and 8
 	std::cin.get();
-	std::cout << "Can you guess the " << WordLength;
-	std::cout << " letter isogram I'm thinking of??\n";
+	std::cout << " << Can you guess the " << WordLength;
+	std::cout << " letter isogram I'm thinking of?? >>\n";
+	std::cout << " ----------------------------------------------------------\n";
+	std::cout << " << A Bull means a correct letter in the correct place.  >>\n";
+	std::cout << " << A Cow means a correct letter in the incorrect place. >>\n";
+	std::cout << " ----------------------------------------------------------\n";
+	std::cout << " <<     If you get a Bull, watch for Helpful Hints!!     >>\n";
+	std::cout << " ----------------------------------------------------------\n";
+	std::cout << "                <<<<< Have fun!!!! >>>>>\n";                
 	std::cout << std::endl;
 	return;
 }
