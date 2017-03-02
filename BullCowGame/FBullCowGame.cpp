@@ -31,17 +31,17 @@ void FBullCowGame::SetHiddenWord(int32 WordLength)
 {
 	TMap<int32, std::vector<FString>> WordLengthToWord
 	{
-		{ 3, { "lit", "bat", "run", "per", "set" } },
-		{ 4, { "folk", "bard", "rack", "port", "tarp" } },
-		{ 5, { "weird", "tramp", "turns", "crash", "month" } },
-		{ 6, { "planet", "ruined", "trader", "county", "biomes" } },
-		{ 7, { "talking", "torment", "parking", "germany", "country" } },
-		{ 8, { "portugal", "quadplex", "jarovize", "humpback", "chipmunk" } }
+		{ 3, { "lit", "bat", "run", "per", "set", "mix", "but", "out", "far", "get", "fox" } },
+		{ 4, { "folk", "bard", "rack", "port", "tarp", "soda", "hugs", "lazy", "cute", "spry" } },
+		{ 5, { "weird", "tramp", "turns", "crash", "month", "steak", "horse", "crazy", "jumps", "snead" } },
+		{ 6, { "planet", "ruined", "trader", "county", "biomes", "racing", "mexico", "jockey", "hijack", "jumble" } },
+		{ 7, { "talking", "torment", "parking", "germany", "country", "jukebox", "mexican", "wackjob", "subject", "quicker" } },
+		{ 8, { "portugal", "quadplex", "jarovize", "humpback", "chipmunk", "quackery", "hijacked", "jumbling", "longjump", "jackfish" } }
 	};
 
 	std::vector<FString> ChosenNumberVector = WordLengthToWord[WordLength]; // User's number picks the word set
 	srand(time(NULL)); 
-	int32 RandomChoice = rand() % 5; // Create a random number to be used to select word from set
+	int32 RandomChoice = rand() % ChosenNumberVector.size(); // Create a random number to be used to select word from set
 	MyHiddenWord = ChosenNumberVector[RandomChoice]; // Pick the word from the set
 	return;
 }
@@ -50,7 +50,7 @@ int32 FBullCowGame::GetMaxTries() const
 { 
 	TMap<int32, int32> WordLengthToMaxTries
 	{ 
-		{3, 6}, {4, 8}, {5, 10}, {6, 12}, {7, 15}, {8, 18}
+		{3, 7}, {4, 10}, {5, 12}, {6, 14}, {7, 18}, {8, 22}
 	};
 	return WordLengthToMaxTries[MyHiddenWord.length()];
 }
