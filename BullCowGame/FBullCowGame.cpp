@@ -17,7 +17,7 @@ FBullCowGame::FBullCowGame()
 
 
 int32 FBullCowGame::GetCurrentTry() const { return MyCurrentTry; }
-int32 FBullCowGame::GetHiddenWordLength() const { return MyHiddenWord.length(); }
+int32 FBullCowGame::GetHiddenWordLength() const { return HiddenWordLength; }
 FString FBullCowGame::GetGameHelper() const { return GameHelper; }
 FString FBullCowGame::GetHiddenWord() const { return MyHiddenWord; } // For testing only
 
@@ -27,16 +27,17 @@ bool FBullCowGame::IsGameWon() const { return bGameIsWon; }
 // PrintIntro function asks for a number,
 // Sends number to SetHiddenWord,
 // Maps the number to a word in the hashmap, and sets that word as the hidden word
-void FBullCowGame::SetHiddenWord(int32 WordLength)
+void FBullCowGame::SetHiddenWordAndLength(int32 WordLength)
 {
+	HiddenWordLength = WordLength;
 	TMap<int32, std::vector<FString>> WordLengthToWord
 	{
-		{ 3, { "lit", "bat", "run", "per", "set", "mix", "but", "out", "far", "get", "fox" } },
+		{ 3, { "rot", "bat", "run", "per", "set", "mix", "ton", "out", "far", "get", "fox" } },
 		{ 4, { "folk", "bard", "rack", "port", "tarp", "soda", "hugs", "lazy", "cute", "spry" } },
 		{ 5, { "weird", "tramp", "turns", "crash", "month", "steak", "horse", "crazy", "jumps", "snead" } },
 		{ 6, { "planet", "ruined", "trader", "county", "biomes", "racing", "mexico", "jockey", "hijack", "jumble" } },
-		{ 7, { "talking", "torment", "parking", "germany", "country", "jukebox", "mexican", "wackjob", "subject", "quicker" } },
-		{ 8, { "portugal", "quadplex", "jarovize", "humpback", "chipmunk", "quackery", "hijacked", "jumbling", "longjump", "jackfish" } }
+		{ 7, { "talking", "torment", "parking", "squirmy", "country", "jukebox", "mexican", "wackjob", "subject", "quicker" } },
+		{ 8, { "muskoxen", "quadplex", "abjuring", "humpback", "chipmunk", "quackery", "hijacked", "jumbling", "longjump", "jackfish" } }
 	};
 
 	std::vector<FString> ChosenNumberVector = WordLengthToWord[WordLength]; // User's number picks the word set
@@ -52,7 +53,7 @@ int32 FBullCowGame::GetMaxTries() const
 	{ 
 		{3, 7}, {4, 10}, {5, 12}, {6, 14}, {7, 18}, {8, 22}
 	};
-	return WordLengthToMaxTries[MyHiddenWord.length()];
+	return WordLengthToMaxTries[GetHiddenWordLength()];
 }
 
 

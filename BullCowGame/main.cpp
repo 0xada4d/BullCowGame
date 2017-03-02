@@ -12,7 +12,8 @@ user interaction. For game logic see the FBullCowGame class.
 using FText = std::string;
 using int32 = int; 
 
-void PrintIntroAndSetWord(); 
+void PrintIntroAndSetWord();
+void InitializeWord(); 
 void PlayGame();
 void PrintGameSummary();
 FText GetValidGuess();
@@ -39,7 +40,9 @@ int main()
 void PrintIntroAndSetWord()
 {
 	// Introduce game
-	std::cout << "Welcome to Bulls and Cows, a fun word game.\n";
+	std::cout << "-------------------------------------------\n";
+	std::cout << "Welcome to Bulls and Cows, a fun word game!\n";
+	std::cout << "-------------------------------------------\n"; 
 	std::cout << std::endl;
 	std::cout << "          }   {         ___ " << std::endl;
 	std::cout << "          (o o)        (o o) " << std::endl;
@@ -48,13 +51,8 @@ void PrintIntroAndSetWord()
 	std::cout << " *  |-,--- |              |------|  * " << std::endl;
 	std::cout << "    ^      ^              ^      ^ " << std::endl;
 	std::cout << std::endl;
-	int32 WordLength;
-	std::cout << "Pick a number, 3 - 8: ";
-	std::cin >> WordLength;
-	std::cout << "\n";
-	BCGame.SetHiddenWord(WordLength); // TODO make sure input is valid, between 3 and 8
-	std::cin.get();
-	std::cout << " << Can you guess the " << WordLength;
+	InitializeWord();  
+	std::cout << " << Can you guess the " << BCGame.GetHiddenWordLength();
 	std::cout << " letter isogram I'm thinking of?? >>\n";
 	std::cout << " ----------------------------------------------------------\n";
 	std::cout << " << A Bull means a correct letter in the correct place.  >>\n";
@@ -67,6 +65,18 @@ void PrintIntroAndSetWord()
 	return;
 }
 
+void InitializeWord() // Function that asks for users number, and then calls SetHiddenWordAndLength based on the number
+{
+	float WordLength;  // Float to handle case of user entering a decimal number
+	std::cout << "Pick a number, 3 - 8: ";
+	std::cin >> WordLength;
+	WordLength = round(WordLength); 
+	if (WordLength < 3.0) { WordLength = 3.0; }  // Simple input validation check
+	if (WordLength > 8.0) { WordLength = 8.0; }  // TODO handle cases of extreme input, ie 30123487023487120238471029
+	std::cout << std::endl;
+	BCGame.SetHiddenWordAndLength(WordLength);
+	std::cin.get();
+}
 
 void PlayGame()
 {
@@ -84,7 +94,8 @@ void PlayGame()
 		
 		std::cout << "Bulls = " << BullCowCount.Bulls;
 		std::cout << ". Cows = " << BullCowCount.Cows << ".\n";
-		std::cout << "Helpful hint: " << BCGame.GetGameHelper() << "\n\n";
+		std::cout << "Helpful hint: In your guess, the letters { " << BCGame.GetGameHelper();
+		std::cout << " } are in the correct position.\n\n";
 	}
 
 	PrintGameSummary();
