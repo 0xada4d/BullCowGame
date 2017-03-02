@@ -25,9 +25,9 @@ void FBullCowGame::SetHiddenWord(int32 WordLength)
 {
 	TMap<int32, FString> WordLengthToWord
 	{
-		{ 3, "ant" },{ 4, "cats" },
+		{ 3, "car" },{ 4, "folk" },
 		{ 5, "grasp" },{ 6, "planet" },
-		{ 7, "talking" },{ 8, "brandish" }
+		{ 7, "talking" },{ 8, "goldfish" }
 	};
 
 	MyHiddenWord = WordLengthToWord[WordLength];
@@ -37,7 +37,7 @@ int32 FBullCowGame::GetMaxTries() const
 { 
 	TMap<int32, int32> WordLengthToMaxTries
 	{ 
-		{3, 4}, {4, 5}, {5, 7}, {6, 10}, {7, 12}, {8, 15}
+		{3, 6}, {4, 8}, {5, 12}, {6, 13}, {7, 15}, {8, 20}
 	};
 	return WordLengthToMaxTries[MyHiddenWord.length()];
 }
