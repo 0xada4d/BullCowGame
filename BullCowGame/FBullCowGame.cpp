@@ -4,7 +4,8 @@
 #define TMap std::map
 
 
-using int32 = int; 
+using int32 = int;
+using FString = std::string;
 
 
 FBullCowGame::FBullCowGame()
@@ -15,6 +16,7 @@ FBullCowGame::FBullCowGame()
 
 int32 FBullCowGame::GetCurrentTry() const { return MyCurrentTry; }
 int32 FBullCowGame::GetHiddenWordLength() const { return MyHiddenWord.length(); }
+FString FBullCowGame::GetGameHelper() const { return GameHelper; };
 bool FBullCowGame::IsGameWon() const { return bGameIsWon; }
 
 
@@ -25,8 +27,8 @@ void FBullCowGame::SetHiddenWord(int32 WordLength)
 {
 	TMap<int32, FString> WordLengthToWord
 	{
-		{ 3, "car" },{ 4, "folk" },
-		{ 5, "grasp" },{ 6, "planet" },
+		{ 3, "axe" },{ 4, "folk" },
+		{ 5, "weird" },{ 6, "planet" },
 		{ 7, "talking" },{ 8, "goldfish" }
 	};
 
@@ -37,7 +39,7 @@ int32 FBullCowGame::GetMaxTries() const
 { 
 	TMap<int32, int32> WordLengthToMaxTries
 	{ 
-		{3, 6}, {4, 8}, {5, 12}, {6, 13}, {7, 15}, {8, 20}
+		{3, 4}, {4, 6}, {5, 8}, {6, 10}, {7, 12}, {8, 14}
 	};
 	return WordLengthToMaxTries[MyHiddenWord.length()];
 }
@@ -52,6 +54,12 @@ void FBullCowGame::Reset()
 	bGameIsWon = false;
 	
 	return; 
+}
+
+void FBullCowGame::ResetGameHelper()
+{
+	GameHelper = ""; 
+	return;
 }
 
 
@@ -102,12 +110,13 @@ FBullCowCount FBullCowGame::SubmitValidGuess(FString Guess)
 				{
 					// and are in same place, increment bulls
 					BullCowCount.Bulls++;
+					GameHelper += toupper(Guess[i]);  // Give player a hint when they get a bull
 					break;
 				}
 				else
 				{
 					// not in same place, increment cows
-					BullCowCount.Cows++;
+					BullCowCount.Cows++; 
 				}
 			}
 		}

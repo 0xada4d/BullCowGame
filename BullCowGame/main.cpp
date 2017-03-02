@@ -67,7 +67,8 @@ void PlayGame()
 		FBullCowCount BullCowCount = BCGame.SubmitValidGuess(Guess); 
 		
 		std::cout << "Bulls = " << BullCowCount.Bulls;
-		std::cout << ". Cows = " << BullCowCount.Cows << ".\n\n";
+		std::cout << ". Cows = " << BullCowCount.Cows << ".\n";
+		std::cout << "Helpful hint: " << BCGame.GetGameHelper() << "\n\n";
 	}
 
 	PrintGameSummary();
@@ -83,6 +84,7 @@ FText GetValidGuess()
 
 	do {
 		// Get guess from player 
+		BCGame.ResetGameHelper(); 
 		int32 CurrentTry = BCGame.GetCurrentTry();
 		std::cout << "Try " << CurrentTry << " of " << BCGame.GetMaxTries();
 		std::cout << ". Enter your guess: ";
