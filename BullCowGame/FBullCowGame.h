@@ -29,6 +29,7 @@ public:
 	int32 GetCurrentTry() const;  // function from modifying variables of object
 	int32 GetHiddenWordLength() const;
 	FString GetGameHelper() const;
+	FString GetHiddenWord() const; // for testing only
 	bool IsGameWon() const;
 	EGuessStatus CheckGuessValidity(FString) const;
 	

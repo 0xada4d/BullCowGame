@@ -46,7 +46,7 @@ void PrintIntroAndSetWord()
 	BCGame.SetHiddenWord(WordLength); // TODO make sure input is valid, between 3 and 8
 	std::cin.get();
 	std::cout << "Can you guess the " << WordLength;
-	std::cout << " letter isogram I'm thinking of??\n";
+	std::cout << " letter isogram I'm thinking of??\n"; 
 	std::cout << std::endl;
 	return;
 }

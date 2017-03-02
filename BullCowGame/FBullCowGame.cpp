@@ -1,6 +1,8 @@
 
 #include "FBullCowGame.h"
 #include <map>
+#include <vector>
+#include <ctime>
 #define TMap std::map
 
 
@@ -16,7 +18,9 @@ FBullCowGame::FBullCowGame()
 
 int32 FBullCowGame::GetCurrentTry() const { return MyCurrentTry; }
 int32 FBullCowGame::GetHiddenWordLength() const { return MyHiddenWord.length(); }
-FString FBullCowGame::GetGameHelper() const { return GameHelper; };
+FString FBullCowGame::GetGameHelper() const { return GameHelper; }
+FString FBullCowGame::GetHiddenWord() const { return MyHiddenWord; } // For testing only
+
 bool FBullCowGame::IsGameWon() const { return bGameIsWon; }
 
 
@@ -25,21 +29,28 @@ bool FBullCowGame::IsGameWon() const { return bGameIsWon; }
 // Maps the number to a word in the hashmap, and sets that word as the hidden word
 void FBullCowGame::SetHiddenWord(int32 WordLength)
 {
-	TMap<int32, FString> WordLengthToWord
+	TMap<int32, std::vector<FString>> WordLengthToWord
 	{
-		{ 3, "axe" },{ 4, "folk" },
-		{ 5, "weird" },{ 6, "planet" },
-		{ 7, "talking" },{ 8, "goldfish" }
+		{ 3, { "lit", "bat", "run", "per", "set" } },
+		{ 4, { "folk", "bard", "rack", "port", "tarp" } },
+		{ 5, { "weird", "tramp", "turns", "crash", "month" } },
+		{ 6, { "planet", "ruined", "trader", "county", "biomes" } },
+		{ 7, { "talking", "torment", "parking", "germany", "country" } },
+		{ 8, { "portugal", "quadplex", "jarovize", "humpback", "chipmunk" } }
 	};
 
-	MyHiddenWord = WordLengthToWord[WordLength];
+	std::vector<FString> ChosenNumberVector = WordLengthToWord[WordLength]; // User's number picks the word set
+	srand(time(NULL)); 
+	int32 RandomChoice = rand() % 5; // Create a random number to be used to select word from set
+	MyHiddenWord = ChosenNumberVector[RandomChoice]; // Pick the word from the set
+	return;
 }
 
 int32 FBullCowGame::GetMaxTries() const 
 { 
 	TMap<int32, int32> WordLengthToMaxTries
 	{ 
-		{3, 4}, {4, 6}, {5, 8}, {6, 10}, {7, 12}, {8, 14}
+		{3, 6}, {4, 8}, {5, 10}, {6, 12}, {7, 15}, {8, 18}
 	};
 	return WordLengthToMaxTries[MyHiddenWord.length()];
 }
