@@ -5,29 +5,18 @@
 #include <ctime>
 #define TMap std::map
 
-
 using int32 = int;
 using FString = std::string;
 
-
-FBullCowGame::FBullCowGame()
-{
-	Reset(); // Does the job of the constructor, resetting the game
-}
-
+FBullCowGame::FBullCowGame() { Reset(); }										// Does the job of the constructor, resetting the game
 
 int32 FBullCowGame::GetCurrentTry() const { return MyCurrentTry; }
 int32 FBullCowGame::GetHiddenWordLength() const { return HiddenWordLength; }
 FString FBullCowGame::GetGameHelper() const { return GameHelper; }
-FString FBullCowGame::GetHiddenWord() const { return MyHiddenWord; } // For testing only
-
+FString FBullCowGame::GetHiddenWord() const { return MyHiddenWord; }			// For testing only
 bool FBullCowGame::IsGameWon() const { return bGameIsWon; }
 
-
-// PrintIntro function asks for a number,
-// Sends number to SetHiddenWord,
-// Maps the number to a word in the hashmap, and sets that word as the hidden word
-void FBullCowGame::SetHiddenWordAndLength(int32 WordLength)
+void FBullCowGame::SetHiddenWordAndLength(int32 WordLength)						// Maps number to vector, then randomly chooses word from vector
 {
 	HiddenWordLength = WordLength;
 	TMap<int32, std::vector<FString>> WordLengthToWord
@@ -42,8 +31,8 @@ void FBullCowGame::SetHiddenWordAndLength(int32 WordLength)
 
 	std::vector<FString> ChosenNumberVector = WordLengthToWord[WordLength]; // User's number picks the word set
 	srand(time(NULL)); 
-	int32 RandomChoice = rand() % ChosenNumberVector.size(); // Create a random number to be used to select word from set
-	MyHiddenWord = ChosenNumberVector[RandomChoice]; // Pick the word from the set
+	int32 RandomChoice = rand() % ChosenNumberVector.size();				// Create a random number to be used to select word from set
+	MyHiddenWord = ChosenNumberVector[RandomChoice];						// Pick the word from the set
 	return;
 }
 
@@ -55,10 +44,6 @@ int32 FBullCowGame::GetMaxTries() const
 	};
 	return WordLengthToMaxTries[GetHiddenWordLength()];
 }
-
-
-
-
 
 void FBullCowGame::Reset()
 {
@@ -74,101 +59,56 @@ void FBullCowGame::ResetGameHelper()
 	return;
 }
 
-
-
 EGuessStatus FBullCowGame::CheckGuessValidity(FString Guess) const
 {
-	
-	if (!IsIsogram(Guess))
-	{
-		return EGuessStatus::Not_Isogram;
-	}
-	else if (!IsLowerCase(Guess))
-	{
-		return EGuessStatus::Not_Lowercase; // if the guess is not lowercase, return error
-	}
-	else if (Guess.length() != GetHiddenWordLength())
-	{
-		return EGuessStatus::Incorrect_Length; // if length is wrong, return error
-	}
-	else
-	{
-		return EGuessStatus::OK; // otherwise return ok
-	}
-	
-	
-	
+	if (!IsIsogram(Guess)) { return EGuessStatus::Not_Isogram; }
+	else if (!IsLowerCase(Guess)) { return EGuessStatus::Not_Lowercase; }							// if the guess is not lowercase, return error
+	else if (Guess.length() != GetHiddenWordLength()) { return EGuessStatus::Incorrect_Length; }	// if length is wrong, return error
+	else { return EGuessStatus::OK; }																// otherwise return ok 
 }
 
-// Recieves valid guess, increments turn, and returns count
-FBullCowCount FBullCowGame::SubmitValidGuess(FString Guess)
+FBullCowCount FBullCowGame::SubmitValidGuess(FString Guess)			// Recieves valid guess, increments turn, and returns count
 {
 	MyCurrentTry++; 
 	FBullCowCount BullCowCount; 
 
-	int32 WordLength = MyHiddenWord.length(); // assume same length as Guess
-
-	// loop through all letters in hidden word
-	for (int32 i = 0; i < WordLength; i++)
+	int32 WordLength = MyHiddenWord.length();						// assume same length as Guess
+	for (int32 i = 0; i < WordLength; i++)							// loop through all letters in hidden word
 	{
-		// compare letters against the guess
-		for (int32 j = 0; j < WordLength; j++)
+		for (int32 j = 0; j < WordLength; j++)						// compare letters against the guess
 		{
 			bool DoLettersMatch = (Guess[i] == MyHiddenWord[j]);
-			// if they match, 
-			if (DoLettersMatch)
+			if (DoLettersMatch)										// if they match,
 			{
-				if (i == j)
+				if (i == j)											// and are in same place, increment bulls
 				{
-					// and are in same place, increment bulls
 					BullCowCount.Bulls++;
-					GameHelper += toupper(Guess[i]);  // Give player a hint when they get a bull
+					GameHelper += toupper(Guess[i]);				// Give player a hint when they get a bull
 					break;
 				}
-				else
-				{
-					// not in same place, increment cows
-					BullCowCount.Cows++; 
-				}
+				else { BullCowCount.Cows++; }						// not in same place, increment cows
 			}
 		}
 	}
-
-	if (BullCowCount.Bulls == WordLength) 
-	{
-		bGameIsWon = true;
-		
-	} 
-	else 
-	{
-		bGameIsWon = false;
-	}
+	if (BullCowCount.Bulls == WordLength) { bGameIsWon = true; }	// Win status check
+	else { bGameIsWon = false; }
 		
 	return BullCowCount;
 }
 
 bool FBullCowGame::IsIsogram(FString Word) const
 {
-	// Treat 0 and 1 letter strings as isograms
-	if (Word.length() < 2) { return 1; }
+	if (Word.length() < 2) { return 1; }			// Treat 0 and 1 letter strings as isograms
 
-	// set up our map
-	TMap<char, bool> LetterSeen;
-
-	for (auto Letter : Word) // Loop through all letters
+	TMap<char, bool> LetterSeen;					// set up our map
+	for (auto Letter : Word)						// Loop through all letters
 	{
 		Letter = tolower(Letter);
-		if (LetterSeen[Letter]) // if the letter is in the map
-		{
-			return false;	// we do not have an isogram
-		}
-		else
-		{
-			LetterSeen[Letter] = true;	// otherwise add letter to map
-		}
+		if (LetterSeen[Letter]) { return false;	}	// If letter in map, we do not have an isogram
+		else { LetterSeen[Letter] = true; }			// otherwise add letter to map
 	}
 			
-	return true; // in case where \0 is entered
+	return true;									// Handles case of \0
 }
 
 bool FBullCowGame::IsLowerCase(FString Word) const
@@ -177,10 +117,7 @@ bool FBullCowGame::IsLowerCase(FString Word) const
 
 	for (auto Letter : Word)
 	{
-		if (!islower(Letter))
-		{
-			return false;
-		}
+		if (!islower(Letter)) { return false; }
 	}
 
 	return true;
