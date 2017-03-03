@@ -43,7 +43,7 @@ void FBullCowGame::SetBullPointMap(FString HiddenWord)  // Takes in the HiddenWo
 
 void FBullCowGame::AddPoints(int32 amount)  // Adds specified amount to PlayerPointTotal
 {
-	PlayerPointTotal += amount;				// TODO add output for the amount of points earned
+	PlayerPointTotal += amount;				// TODO add output for the amount of points earned 
 	return;
 }
 
@@ -84,18 +84,18 @@ EGuessStatus FBullCowGame::CheckGuessValidity(FString Guess) const
 	else { return EGuessStatus::OK; }																// otherwise return ok 
 }
 
-void FBullCowGame::CheckForWinStatus(FBullCowCount BullCowCount)
-{
+void FBullCowGame::CheckForWinStatus(FBullCowCount BullCowCount)		// If bulls = hidden word length, the player wins the game
+{																		
 	if (BullCowCount.Bulls == MyHiddenWord.length())
 	{
 		bGameIsWon = true;
-		AddPoints(30);
+		AddPoints(30);													// TODO Get rid of magic number
 	}
 	else { bGameIsWon = false; }
 	return;
 }
 
-FBullCowCount FBullCowGame::SubmitValidGuess(FString Guess)			// Recieves valid guess, increments turn, and returns count
+FBullCowCount FBullCowGame::SubmitValidGuess(FString Guess)				// Recieves valid guess, increments turn, and returns count
 {
 	MyCurrentTry++; 
 	FBullCowCount BullCowCount; 
@@ -111,7 +111,7 @@ FBullCowCount FBullCowGame::SubmitValidGuess(FString Guess)			// Recieves valid 
 				if (i == j)												// and are in same place, increment bulls
 				{
 					char CurrentChar = Guess[i];
-					BullCowCount.Bulls++;								// TODO create a helper function here to clean this up
+					BullCowCount.Bulls++;								// TODO Fix magic numbers for points
 					GameHelper += toupper(CurrentChar);					// Give player a hint when they get a bull		
 
 					if (!BullPointMap[CurrentChar])						// Check BullPointMap value for current character

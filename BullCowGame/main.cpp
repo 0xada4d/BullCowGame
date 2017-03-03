@@ -23,7 +23,7 @@ FBullCowGame BCGame;				// Instantiate a new game
 
 int main()							// Entry point for our application
 {
-	srand(time(NULL));
+	srand(time(NULL));				// Seed random number generator with new value on every run
 	BCGame.ResetPlayerPointTotal();	// Initialize/Reset point total to 0 on game initialization
 
 	bool bPlayAgain = false; 
