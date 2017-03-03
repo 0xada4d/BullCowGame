@@ -6,36 +6,40 @@ user interaction. For game logic see the FBullCowGame class.
 
 #include <iostream>
 #include <string>
+#include <ctime>
 #include "FBullCowGame.h"
 
 using FText = std::string;
 using int32 = int; 
 
-void PrintIntroAndInitializeWord();
+void PrintIntroAndSetWord();
 void InitializeWord(); 
 void PlayGame();
 void PrintGameSummary();
 FText GetValidGuess();
 bool AskToPlayAgain(); 
 
-FBullCowGame BCGame;			// Instantiate a new game
+FBullCowGame BCGame;				// Instantiate a new game
 
-int main()						// Entry point for our application
+int main()							// Entry point for our application
 {
+	srand(time(NULL));
+	BCGame.ResetPlayerPointTotal();	// Initialize/Reset point total to 0 on game initialization
+
 	bool bPlayAgain = false; 
 	do {
-		PrintIntroAndInitializeWord();
+		PrintIntroAndSetWord();
 		PlayGame();
 		bPlayAgain = AskToPlayAgain(); 
 	} 
-	while (bPlayAgain); 
+	while (bPlayAgain);
 	
-	return 0;					// Exit the application
+	return 0;						// Exit the application
 }
 
 
 
-void PrintIntroAndInitializeWord() // Introduce game
+void PrintIntroAndSetWord() // Introduce game
 {
 	std::cout << "-------------------------------------------\n";
 	std::cout << "Welcome to Bulls and Cows, a fun word game!\n";
@@ -59,7 +63,8 @@ void PrintIntroAndInitializeWord() // Introduce game
 	std::cout << " ----------------------------------------------------------\n";
 	std::cout << " <<     If you get a Bull, watch for Helpful Hints!!     >>\n";
 	std::cout << " ----------------------------------------------------------\n";
-	std::cout << "                <<<<< Have fun!!!! >>>>>\n";                
+	std::cout << "                <<<<< Have fun!!!! >>>>>\n"; 
+	std::cout << BCGame.GetHiddenWord() << "\n";
 	std::cout << std::endl;
 
 	return;
@@ -70,12 +75,13 @@ void InitializeWord()								// Get number from player, send to set up hidden wo
 	float WordLength;								// Float to handle case of user entering a decimal number
 	std::cout << "Pick a number, 3 - 8: ";
 	std::cin >> WordLength;
+	std::cin.get();
 	WordLength = round(WordLength); 
 	if (WordLength < 3.0) { WordLength = 3.0; }		// Simple input validation check
 	if (WordLength > 8.0) { WordLength = 8.0; }		// TODO handle cases of extreme input, ie 30123487023487120238471029
 	std::cout << std::endl;
 	BCGame.SetHiddenWordAndLength(WordLength);
-	std::cin.get();
+	BCGame.SetBullPointMap(BCGame.GetHiddenWord());
 }
 
 void PlayGame()
@@ -91,7 +97,8 @@ void PlayGame()
 		std::cout << "Bulls = " << BullCowCount.Bulls;
 		std::cout << ". Cows = " << BullCowCount.Cows << ".\n";
 		std::cout << "Helpful hint: In your guess, the letters { " << BCGame.GetGameHelper();
-		std::cout << " } are in the correct position.\n\n";
+		std::cout << " } are in the correct position.\n";
+		std::cout << "Current points: " << BCGame.GetMyPoints() << "\n\n";
 	}
 
 	PrintGameSummary();
@@ -123,7 +130,7 @@ FText GetValidGuess()
 		case EGuessStatus::Not_Lowercase:
 			std::cout << "Please enter only lowercase letters.\n\n";
 			break;
-		default:							// If it makes it here, assume Guess is valid
+		default:							// If code gets here, assume Guess is valid
 			break;
 		}
 	} while (Status != EGuessStatus::OK);	// Keep looping until input is valid
@@ -146,5 +153,7 @@ void PrintGameSummary()
 	if (BCGame.IsGameWon()) { std::cout << "WELL DONE - YOU WIN!!\n\n"; } 
 	else { std::cout << "Better luck next time!\n\n"; }
 }
+
+
 
 

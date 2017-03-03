@@ -2,7 +2,7 @@
 #include "FBullCowGame.h"
 #include <map>
 #include <vector>
-#include <ctime>
+
 #define TMap std::map
 
 using int32 = int;
@@ -12,6 +12,7 @@ FBullCowGame::FBullCowGame() { Reset(); }										// Does the job of the constr
 
 int32 FBullCowGame::GetCurrentTry() const { return MyCurrentTry; }
 int32 FBullCowGame::GetHiddenWordLength() const { return HiddenWordLength; }
+int32 FBullCowGame::GetMyPoints() const { return PlayerPointTotal; }
 FString FBullCowGame::GetGameHelper() const { return GameHelper; }
 FString FBullCowGame::GetHiddenWord() const { return MyHiddenWord; }			// For testing only
 bool FBullCowGame::IsGameWon() const { return bGameIsWon; }
@@ -30,9 +31,19 @@ void FBullCowGame::SetHiddenWordAndLength(int32 WordLength)						// Maps number 
 	};
 
 	std::vector<FString> ChosenNumberVector = WordLengthToWord[WordLength]; // User's number picks the word set
-	srand(time(NULL)); 
 	int32 RandomChoice = rand() % ChosenNumberVector.size();				// Create a random number to be used to select word from set
 	MyHiddenWord = ChosenNumberVector[RandomChoice];						// Pick the word from the set
+	return;
+}
+
+void FBullCowGame::SetBullPointMap(FString HiddenWord)  // Takes in the HiddenWord and initializes PointMap with its characters
+{
+	for (char Letter : HiddenWord) { BullPointMap[Letter] = false; }			
+}
+
+void FBullCowGame::AddPoints(int32 amount)  // Adds specified amount to PlayerPointTotal
+{
+	PlayerPointTotal += amount;				// TODO add output for the amount of points earned
 	return;
 }
 
@@ -59,6 +70,12 @@ void FBullCowGame::ResetGameHelper()
 	return;
 }
 
+void FBullCowGame::ResetPlayerPointTotal()
+{
+	PlayerPointTotal = 0;
+	return;
+}
+
 EGuessStatus FBullCowGame::CheckGuessValidity(FString Guess) const
 {
 	if (!IsIsogram(Guess)) { return EGuessStatus::Not_Isogram; }
@@ -67,31 +84,48 @@ EGuessStatus FBullCowGame::CheckGuessValidity(FString Guess) const
 	else { return EGuessStatus::OK; }																// otherwise return ok 
 }
 
+void FBullCowGame::CheckForWinStatus(FBullCowCount BullCowCount)
+{
+	if (BullCowCount.Bulls == MyHiddenWord.length())
+	{
+		bGameIsWon = true;
+		AddPoints(30);
+	}
+	else { bGameIsWon = false; }
+	return;
+}
+
 FBullCowCount FBullCowGame::SubmitValidGuess(FString Guess)			// Recieves valid guess, increments turn, and returns count
 {
 	MyCurrentTry++; 
 	FBullCowCount BullCowCount; 
 
-	int32 WordLength = MyHiddenWord.length();						// assume same length as Guess
-	for (int32 i = 0; i < WordLength; i++)							// loop through all letters in hidden word
+	int32 WordLength = MyHiddenWord.length();							// assume same length as Guess
+	for (int32 i = 0; i < WordLength; i++)								// loop through all letters in hidden word
 	{
-		for (int32 j = 0; j < WordLength; j++)						// compare letters against the guess
+		for (int32 j = 0; j < WordLength; j++)							// compare letters against the guess
 		{
 			bool DoLettersMatch = (Guess[i] == MyHiddenWord[j]);
-			if (DoLettersMatch)										// if they match,
+			if (DoLettersMatch)											// if they match,
 			{
-				if (i == j)											// and are in same place, increment bulls
+				if (i == j)												// and are in same place, increment bulls
 				{
-					BullCowCount.Bulls++;
-					GameHelper += toupper(Guess[i]);				// Give player a hint when they get a bull
+					char CurrentChar = Guess[i];
+					BullCowCount.Bulls++;								// TODO create a helper function here to clean this up
+					GameHelper += toupper(CurrentChar);					// Give player a hint when they get a bull		
+
+					if (!BullPointMap[CurrentChar])						// Check BullPointMap value for current character
+					{													// If value is false, letter has not been counted, thus
+						AddPoints(10);									// Add points to total and set value to true
+						BullPointMap[CurrentChar] = true;
+					}													// Otherwise don't do anything
 					break;
 				}
-				else { BullCowCount.Cows++; }						// not in same place, increment cows
+				else { BullCowCount.Cows++; }							// not in same place, increment cows
 			}
 		}
 	}
-	if (BullCowCount.Bulls == WordLength) { bGameIsWon = true; }	// Win status check
-	else { bGameIsWon = false; }
+	CheckForWinStatus(BullCowCount);									// Check for win status
 		
 	return BullCowCount;
 }
@@ -122,5 +156,6 @@ bool FBullCowGame::IsLowerCase(FString Word) const
 
 	return true;
 }
+
 
 
