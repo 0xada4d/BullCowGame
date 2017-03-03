@@ -22,7 +22,6 @@ enum class EGuessStatus
 class FBullCowGame
 {
 public:
-
 	FBullCowGame(); //constructor
 	
 	int32 GetMaxTries() const; // const at end of declaration prevents--
@@ -37,12 +36,9 @@ public:
 	void Reset(); // TODO Make a richer return value
 	void ResetGameHelper(); 
 	
-	
-	// counts bulls and cows, and increasing try number assuming valid guess
-	FBullCowCount SubmitValidGuess(FString); 
+	FBullCowCount SubmitValidGuess(FString); // counts bulls and cows, and increasing try number assuming valid guess
 
 private:
-	// See constructor for initialization
 	int32 MyCurrentTry;
 	FString MyHiddenWord;
 	FString GameHelper;  // Variable to help player know where bulls are located
