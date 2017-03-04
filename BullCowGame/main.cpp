@@ -81,7 +81,7 @@ void InitializeWord()								// Get number from player, send to set up hidden wo
 	if (WordLength > 8.0) { WordLength = 8.0; }		// TODO handle cases of extreme input, ie 30123487023487120238471029
 	std::cout << std::endl;
 	BCGame.SetHiddenWordAndLength(WordLength);
-	BCGame.SetBullPointMap(BCGame.GetHiddenWord());
+	BCGame.SetPointMaps(BCGame.GetHiddenWord());
 }
 
 void PlayGame()
@@ -89,7 +89,7 @@ void PlayGame()
 	BCGame.Reset();
 
 	int32 MaxTries = BCGame.GetMaxTries(); 
-	while (!BCGame.IsGameWon() && BCGame.GetCurrentTry() <= MaxTries)	// Loop asking for guesses while the game is not won while have tries remaining
+	while (!BCGame.IsGameWon() && BCGame.GetCurrentTry() <= MaxTries)	// Loop asking for guesses while the game is not won, while have tries remaining
 	{
 		FText Guess = GetValidGuess();
 		FBullCowCount BullCowCount = BCGame.SubmitValidGuess(Guess);	// Submit valid guess to the game
@@ -101,6 +101,8 @@ void PlayGame()
 		std::cout << "Current points: " << BCGame.GetMyPoints() << "\n\n";
 	}
 
+	if (BCGame.IsGameWon()) { BCGame.ImplementGameWinCondition(); }
+	else { BCGame.ImplementGameLossCondition(); }
 	PrintGameSummary();
 
 	return; 
@@ -150,7 +152,11 @@ bool AskToPlayAgain()									// Ask player if they want to continue playing
 
 void PrintGameSummary()
 {
-	if (BCGame.IsGameWon()) { std::cout << "WELL DONE - YOU WIN!!\n\n"; } 
+	int32 FinalPointValue = BCGame.GetMyPoints();
+	std::cout << "Final points: " << FinalPointValue << std::endl;
+	std::cout << std::endl;
+	if (BCGame.IsGameWon() && FinalPointValue > 0) { std::cout << "WELL DONE - YOU WIN!!\n\n"; }
+	else if (BCGame.IsGameWon()) { std::cout << "Sorry, you lost too many points... Better luck next time!\n\n"; }
 	else { std::cout << "Better luck next time!\n\n"; }
 }
 
