@@ -11,13 +11,25 @@ using FString = std::string;
 
 FBullCowGame::FBullCowGame() { Reset(); }										// Does the job of the constructor, resetting the game
 
+int32 FBullCowGame::GetMinWordLength() const { return MinWordLength; }
+int32 FBullCowGame::GetMaxWordLength() const { return MaxWordLength; }
+int32 FBullCowGame::GetCurrentWordLength() const { return CurrentWordLength; }
 int32 FBullCowGame::GetMaxTries() const { return GameMaxTries; }
 int32 FBullCowGame::GetCurrentTry() const { return MyCurrentTry; }
 int32 FBullCowGame::GetHiddenWordLength() const { return HiddenWordLength; }
 int32 FBullCowGame::GetMyPoints() const { return PlayerPointTotal; }
 FString FBullCowGame::GetGameHelper() const { return GameHelper; }
 FString FBullCowGame::GetHiddenWord() const { return MyHiddenWord; }			// For testing only
-bool FBullCowGame::IsGameWon() const { return bGameIsWon; }
+bool FBullCowGame::IsWordGuessed() const { return bWordIsWon; }
+
+bool FBullCowGame::IsGameWon()									// Check all values in GameCompletionMap to determine if game is won
+{
+	for (int32 i = MinWordLength; i <= MaxWordLength; i++)
+	{
+		if (!GameCompletionMap[i]) { return false; }
+	}
+	return true;
+}
 
 void FBullCowGame::SetHiddenWordAndLength(int32 WordLength)						// Maps number to vector, then randomly chooses word from vector
 {
@@ -27,8 +39,8 @@ void FBullCowGame::SetHiddenWordAndLength(int32 WordLength)						// Maps number 
 		{ 3, { "rot", "bat", "run", "per", "set", "mix", "ton", "out", "far", "get", "fox" } },
 		{ 4, { "folk", "bard", "rack", "port", "tarp", "soda", "hugs", "lazy", "cute", "spry" } },
 		{ 5, { "weird", "tramp", "turns", "crash", "month", "steak", "horse", "crazy", "jumps", "snead" } },
-		{ 6, { "planet", "ruined", "trader", "county", "biomes", "racing", "mexico", "jockey", "hijack", "jumble" } },
-		{ 7, { "talking", "torment", "parking", "squirmy", "country", "jukebox", "mexican", "wackjob", "subject", "quicker" } },
+		{ 6, { "planet", "ruined", "swipes", "county", "biomes", "racing", "mexico", "jockey", "hijack", "jumble" } },
+		{ 7, { "talking", "calzone", "parking", "squirmy", "country", "jukebox", "mexican", "wackjob", "subject", "quicker" } },
 		{ 8, { "muskoxen", "quadplex", "abjuring", "humpback", "chipmunk", "quackery", "hijacked", "jumbling", "longjump", "jackfish" } }
 	};
 
@@ -45,6 +57,15 @@ void FBullCowGame::SetPointMaps(FString HiddenWord)  // Takes in the HiddenWord 
 		BullPointMap[Letter] = false;
 		CowPointMap[Letter] = false;
 	}			
+}
+
+void FBullCowGame::SetGameCompletionMap()
+{
+	for (int32 i = MinWordLength; i <= MaxWordLength; i++)
+	{
+		GameCompletionMap[i] = false;
+		return;
+	}
 }
 
 void FBullCowGame::AddPoints(int32 amount)  // Adds specified amount to PlayerPointTotal
@@ -72,7 +93,7 @@ void FBullCowGame::SetMaxTries()
 void FBullCowGame::Reset()
 {
 	MyCurrentTry = 1;
-	bGameIsWon = false;
+	bWordIsWon = false;
 	SetMaxTries();
 	
 	return; 
@@ -90,6 +111,12 @@ void FBullCowGame::ResetPlayerPointTotal()
 	return;
 }
 
+void FBullCowGame::ResetCurrentWordLength()
+{
+	CurrentWordLength = MinWordLength;
+	return;
+}
+
 EGuessStatus FBullCowGame::CheckGuessValidity(FString Guess) const
 {
 	if (false) { return EGuessStatus::Hint; }														// if player submits @hint, return Hint status
@@ -101,22 +128,24 @@ EGuessStatus FBullCowGame::CheckGuessValidity(FString Guess) const
 
 void FBullCowGame::CheckForMaxBulls(FBullCowCount BullCowCount)			// If bulls = hidden word length, the player wins the game
 {																		
-	if (BullCowCount.Bulls == HiddenWordLength)	{ bGameIsWon = true; }	
-	else { bGameIsWon = false; }
+	if (BullCowCount.Bulls == HiddenWordLength)	{ bWordIsWon = true; }	
+	else { bWordIsWon = false; }
 	return;
 }
 
-void FBullCowGame::ImplementGameWinCondition()
+void FBullCowGame::ImplementWordWinCondition()
 {
 	AddPoints(WinPV);
-	std::cout << "You guessed the word! Adding " << WinPV << " points...\n\n";
+	GameCompletionMap[HiddenWordLength] = true;
+	std::cout << "You guessed the word! Adding " << WinPV << " points...\n";
+	CurrentWordLength++;
 	return;
 }
 
-void FBullCowGame::ImplementGameLossCondition()			// If bGameIsWon remains false throughout game, player loses points
+void FBullCowGame::ImplementWordLossCondition()			// If bGameIsWon remains false throughout tries for word, player loses points
 {
 	SubtractPoints(FailurePV);
-	std::cout << "You lost. Subtracting " << FailurePV << " points...\n\n";
+	std::cout << "You didn't guess the word. Subtracting " << FailurePV << " points...\n";
 	return;
 }
 
@@ -142,7 +171,7 @@ void FBullCowGame::CheckCowPointMap(char GuessChar)
 
 void FBullCowGame::CheckForPointLoss(bool IsMatch)
 {
-	if (!IsMatch && (MyCurrentTry >= (GameMaxTries * .5)))		// Halfway through game and make bad guess, player loses points
+	if (!IsMatch && (MyCurrentTry > (GameMaxTries * .5)))		// Halfway through game and make bad guess, player loses points
 	{
 		SubtractPoints(NoMatchMidGamePV);
 	}
@@ -153,36 +182,35 @@ void FBullCowGame::CheckForPointLoss(bool IsMatch)
 	else { return; }
 }
 
-FBullCowCount FBullCowGame::SubmitValidGuess(FString Guess)				// Recieves valid guess, increments turn, and returns count
-{
-	MyCurrentTry++; 
-	FBullCowCount BullCowCount; 
-								
+FBullCowCount FBullCowGame::SubmitValidGuess(FString Guess)	// Recieves valid guess, increments turn, and returns count
+{ 
+	FBullCowCount BullCowCount; 							
 	bool GuessHasMatch = false;
-	for (int32 i = 0; i < HiddenWordLength; i++)								// loop through all letters in hidden word
+	for (int32 i = 0; i < HiddenWordLength; i++)			// loop through all letters in hidden word
 	{
-		for (int32 j = 0; j < HiddenWordLength; j++)							// compare letters against the guess
+		for (int32 j = 0; j < HiddenWordLength; j++)		// compare letters against the guess
 		{
-			if (Guess[i] == MyHiddenWord[j])							// if letters match,
+			if (Guess[i] == MyHiddenWord[j])				// if letters match,
 			{
 				GuessHasMatch = true;
 				char CurrentChar = Guess[i];
 				if (i == j)												
 				{
-					BullCowCount.Bulls++;								// and are in same place, increment bulls
-					GameHelper += toupper(CurrentChar);					// Give player a hint when they get a bull
+					BullCowCount.Bulls++;					// and are in same place, increment bulls
+					GameHelper += toupper(CurrentChar);		// Give player a hint when they get a bull
 					CheckBullPointMap(CurrentChar);
 				}
 				else 
 				{ 
-					BullCowCount.Cows++;								// not in same place, increment cows
+					BullCowCount.Cows++;					// not in same place, increment cows
 					CheckCowPointMap(CurrentChar);
 				}							
 			}
 		}
 	}
 	CheckForPointLoss(GuessHasMatch);
-	CheckForMaxBulls(BullCowCount);									// Check for win status (Bulls = Hidden word length)
+	CheckForMaxBulls(BullCowCount);							// Check for win status (Bulls = Hidden word length)
+	MyCurrentTry++;
 		
 	return BullCowCount;
 }
