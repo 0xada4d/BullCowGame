@@ -12,12 +12,19 @@ user interaction. For game logic see the FBullCowGame class.
 using FText = std::string;
 using int32 = int; 
 
+void PrintGameTitlePicture();
+void PrintGameDirections();
 void PrintIntroAndSetWord();
-void InitializeWord(); 
+void InitializeWord();
+void InitializeWord(int32);
+void PrintGuessSummary(FBullCowCount);
 void PlayGame();
-void PrintGameSummary();
+void PrintRoundSummary();
+void PrintGameWinSummary();
+void PrintGameLossSummary(bool);
 FText GetValidGuess();
-bool AskToPlayAgain(); 
+bool AskToKeepPlaying();
+bool CheckToContinuePlay(); 
 
 FBullCowGame BCGame;				// Instantiate a new game
 
@@ -25,25 +32,36 @@ int main()							// Entry point for our application
 {
 	srand(time(NULL));				// Seed random number generator with new value on every run
 	BCGame.ResetPlayerPointTotal();	// Initialize/Reset point total to 0 on game initialization
+	BCGame.SetGameCompletionMap();	// Called once at beginning of game to keep track of which word-lengths user has guessed
 
 	bool bPlayAgain = false; 
 	do {
 		PrintIntroAndSetWord();
 		PlayGame();
-		bPlayAgain = AskToPlayAgain(); 
+		bPlayAgain = CheckToContinuePlay(); 
 	} 
 	while (bPlayAgain);
 	
 	return 0;						// Exit the application
 }
 
+void PrintIntroAndSetWord() // Introduce game and set word
+{
+	PrintGameTitlePicture();
+	if (!BCGame.GetEnterBonusRound()) { InitializeWord(); }
+	else { InitializeWord(BCGame.GetBonusWordLength()); }
+	PrintGameDirections(); 
+	std::cout << BCGame.GetHiddenWord() << "\n";
+	std::cout << std::endl;
 
+	return;
+}
 
-void PrintIntroAndSetWord() // Introduce game
+void PrintGameTitlePicture()
 {
 	std::cout << "-------------------------------------------\n";
 	std::cout << "Welcome to Bulls and Cows, a fun word game!\n";
-	std::cout << "-------------------------------------------\n"; 
+	std::cout << "-------------------------------------------\n";
 	std::cout << std::endl;
 	std::cout << "          }   {         ___ " << std::endl;
 	std::cout << "          (o o)        (o o) " << std::endl;
@@ -52,9 +70,26 @@ void PrintIntroAndSetWord() // Introduce game
 	std::cout << " *  |-,--- |              |------|  * " << std::endl;
 	std::cout << "    ^      ^              ^      ^ " << std::endl;
 	std::cout << std::endl;
+	return;
+}
 
-	InitializeWord();
+void InitializeWord()								// Get the current word length and set the word (and Maps) based on length
+{
+	int32 WordLength = BCGame.GetCurrentWordLength();
+	BCGame.SetHiddenWordAndLength(WordLength);
+	BCGame.SetPointMaps(BCGame.GetHiddenWord());
+	return;
+}
 
+void InitializeWord(int32 number)
+{
+	BCGame.SetHiddenWordAndLength(number);
+	BCGame.SetPointMaps(BCGame.GetHiddenWord());
+	return;
+}
+
+void PrintGameDirections()
+{
 	std::cout << " << Can you guess the " << BCGame.GetHiddenWordLength();
 	std::cout << " letter isogram I'm thinking of?? >>\n";
 	std::cout << " ----------------------------------------------------------\n";
@@ -63,24 +98,8 @@ void PrintIntroAndSetWord() // Introduce game
 	std::cout << " ----------------------------------------------------------\n";
 	std::cout << " <<     If you get a Bull, watch for Helpful Hints!!     >>\n";
 	std::cout << " ----------------------------------------------------------\n";
-	std::cout << "                <<<<< Have fun!!!! >>>>>\n"; 
-	std::cout << std::endl;
-
+	std::cout << "                <<<<< Have fun!!!! >>>>>\n";
 	return;
-}
-
-void InitializeWord()								// Get number from player, send to set up hidden word
-{
-	float WordLength;								// Float to handle case of user entering a decimal number
-	std::cout << "Pick a number, 3 - 8: ";
-	std::cin >> WordLength;
-	std::cin.get();
-	WordLength = round(WordLength); 
-	if (WordLength < 3.0) { WordLength = 3.0; }		// Simple input validation check
-	if (WordLength > 8.0) { WordLength = 8.0; }		// TODO handle cases of extreme input, ie 30123487023487120238471029
-	std::cout << std::endl;
-	BCGame.SetHiddenWordAndLength(WordLength);
-	BCGame.SetBullPointMap(BCGame.GetHiddenWord());
 }
 
 void PlayGame()
@@ -88,24 +107,30 @@ void PlayGame()
 	BCGame.Reset();
 
 	int32 MaxTries = BCGame.GetMaxTries(); 
-	while (!BCGame.IsGameWon() && BCGame.GetCurrentTry() <= MaxTries)	// Loop asking for guesses while the game is not won while have tries remaining
+	while (!BCGame.IsWordGuessed() && BCGame.GetCurrentTry() <= MaxTries)	// Loop asking for guesses while word is not guessed and while having tries remaining
 	{
 		FText Guess = GetValidGuess();
-		FBullCowCount BullCowCount = BCGame.SubmitValidGuess(Guess);	// Submit valid guess to the game
-		
-		std::cout << "Bulls = " << BullCowCount.Bulls;
-		std::cout << ". Cows = " << BullCowCount.Cows << ".\n";
-		std::cout << "Helpful hint: In your guess, the letters { " << BCGame.GetGameHelper();
-		std::cout << " } are in the correct position.\n";
-		std::cout << "Current points: " << BCGame.GetMyPoints() << "\n\n";
+		FBullCowCount BullCowCount = BCGame.SubmitValidGuess(Guess);		// Submit valid guess to the game
+		PrintGuessSummary(BullCowCount);
 	}
 
-	PrintGameSummary();
+	if (BCGame.IsWordGuessed()) { BCGame.ImplementWordWinCondition(); }		// Player guessed the correct word in a round
+	else { BCGame.ImplementWordLossCondition(); }							// Player did not guess the word
 
 	return; 
 }
 
-FText GetValidGuess()
+void PrintGuessSummary(FBullCowCount BullCowCount)							// Shows Player the number of Bulls and Cows in guess
+{																			// and prints a hint for the bulls
+	std::cout << "Bulls = " << BullCowCount.Bulls;
+	std::cout << ". Cows = " << BullCowCount.Cows << ".\n";
+	std::cout << "Helpful hint: In your guess, the letters { " << BCGame.GetGameHelper();
+	std::cout << " } are in the correct position.\n";
+	std::cout << "Current points: " << BCGame.GetMyPoints() << "\n\n";
+	return;
+}
+
+FText GetValidGuess()														// Makes sure player puts in a valid string for the game
 {
 	FText Guess = "";
 	EGuessStatus Status = EGuessStatus::Invalid_Status;
@@ -138,20 +163,101 @@ FText GetValidGuess()
 	 
 }
 
-bool AskToPlayAgain()									// Ask player if they want to continue playing
+bool CheckToContinuePlay()												// Check for correct conditions to continue game
 {
-	std::cout << "Do you want to play again? (y/n) ";	// TODO validate player input here
-	FText Response = ""; 
-	std::getline(std::cin, Response); 
-
-	return (Response[0] == 'Y' || Response[0] == 'y');  
+	bool bPositivePoints = (BCGame.GetMyPoints() > 0);					// TODO make calculation for more robust check for negative value
+	bool bGameIsWon = BCGame.IsGameWon();
+	if (bPositivePoints && BCGame.GetCurrentWordLength() <= BCGame.GetMaxWordLength())	
+	{
+		PrintRoundSummary();
+		std::cout << "On to the next word? (Y/n) ";
+		return AskToKeepPlaying();
+	}
+	else					
+	{
+		if (bGameIsWon && bPositivePoints) 
+		{ 
+			PrintGameWinSummary();
+			if (BCGame.GetRestartAfterBonus())
+			{
+				BCGame.ResetPlayerPointTotal();
+				BCGame.ResetCurrentWordLength();
+				return true;
+			}
+			else if (!BCGame.GetRestartAfterBonus()) { return false; }
+			else if (BCGame.GetEnterBonusRound()) { return true; }
+			else { return false; }
+		}
+		else { 
+			PrintGameLossSummary(bPositivePoints);
+			if (AskToKeepPlaying()) {
+				BCGame.ResetPlayerPointTotal();
+				BCGame.ResetCurrentWordLength();
+				return true;
+			}
+			else { return false; }
+		}
+	}
 }
 
-void PrintGameSummary()
+void PrintRoundSummary()								// States the result of the round just played, including points
 {
-	if (BCGame.IsGameWon()) { std::cout << "WELL DONE - YOU WIN!!\n\n"; } 
+	int32 FinalPointValue = BCGame.GetMyPoints();
+	std::cout << "Total points: " << FinalPointValue << std::endl;
+	std::cout << std::endl;
+	if (BCGame.IsWordGuessed()) { std::cout << "WELL DONE!!\n\n"; }
 	else { std::cout << "Better luck next time!\n\n"; }
+	return;
 }
+
+bool AskToKeepPlaying()									// Gets a player response and interprets it to proceed
+{
+	FText Response = "";
+	std::getline(std::cin, Response);
+	return (Response[0] == 'Y' || Response[0] == 'y' || Response == "");
+}
+
+void PrintGameWinSummary()
+{
+	if (!BCGame.GetEnterBonusRound()) {
+		std::cout << "Final points: " << BCGame.GetMyPoints() << std::endl;
+		std::cout << std::endl;
+		std::cout << "=====================================\n";
+		std::cout << "YOU WON THE GAME! CONGRATULATIONS!!!!\n";
+		std::cout << "=====================================\n\n";
+		std::cout << "Would you like to enter the bonus round? (Y/n) \n";
+		FText Response = "";
+		std::getline(std::cin, Response);
+		BCGame.SetEnterBonusRound((Response[0] == 'Y' || Response[0] == 'y' || Response == ""));
+	}
+	else
+	{
+		BCGame.SetCompleteBonusRound(true);
+		std::cout << "Final points: " << BCGame.GetMyPoints() << std::endl;
+		std::cout << std::endl;
+		std::cout << "========================================\n";
+		std::cout << "AMAZING! YOU COMPLETED THE BONUS ROUND!!\n";
+		std::cout << "========================================\n\n";
+		std::cout << "You destroyed my game! Would you like to restart? (Y/n)";
+		FText Response = "";
+		std::getline(std::cin, Response);
+		BCGame.SetRestartAfterBonus((Response[0] == 'Y' || Response[0] == 'y' || Response == ""));
+	}
+	return;
+}
+
+void PrintGameLossSummary(bool PositivePoints)
+{
+	std::cout << "Final points: " << BCGame.GetMyPoints() << std::endl;
+	std::cout << "\n====================================================\n";
+	if (PositivePoints) { std::cout << "YOU LOST, you did not guess all of the words!\n"; }
+	else { std::cout << "YOU LOST, you did not have enough points to continue.\n"; }
+	std::cout << "====================================================\n\n";
+	std::cout << "Would you like to restart? (Y/n) \n";
+	return;
+}
+
+
 
 
 
