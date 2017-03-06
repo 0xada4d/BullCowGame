@@ -51,7 +51,6 @@ void PrintIntroAndSetWord() // Introduce game and set word
 	if (!BCGame.GetEnterBonusRound()) { InitializeWord(); }
 	else { InitializeWord(BCGame.GetBonusWordLength()); }
 	PrintGameDirections(); 
-	std::cout << BCGame.GetHiddenWord() << "\n";
 	std::cout << std::endl;
 
 	return;
@@ -99,6 +98,7 @@ void PrintGameDirections()
 	std::cout << " <<     If you get a Bull, watch for Helpful Hints!!     >>\n";
 	std::cout << " ----------------------------------------------------------\n";
 	std::cout << "                <<<<< Have fun!!!! >>>>>\n";
+	std::cout << BCGame.GetHiddenWord() << std::endl;
 	return;
 }
 
@@ -182,9 +182,10 @@ bool CheckToContinuePlay()												// Check for correct conditions to continu
 			{
 				BCGame.ResetPlayerPointTotal();
 				BCGame.ResetCurrentWordLength();
+				BCGame.SetEnterBonusRound(false);
+				BCGame.SetRestartAfterBonus(false);
 				return true;
 			}
-			else if (!BCGame.GetRestartAfterBonus()) { return false; }
 			else if (BCGame.GetEnterBonusRound()) { return true; }
 			else { return false; }
 		}
