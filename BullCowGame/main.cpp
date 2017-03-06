@@ -16,6 +16,7 @@ void PrintGameTitlePicture();
 void PrintGameDirections();
 void PrintIntroAndSetWord();
 void InitializeWord();
+void InitializeWord(int32);
 void PrintGuessSummary(FBullCowCount);
 void PlayGame();
 void PrintRoundSummary();
@@ -31,6 +32,7 @@ int main()							// Entry point for our application
 {
 	srand(time(NULL));				// Seed random number generator with new value on every run
 	BCGame.ResetPlayerPointTotal();	// Initialize/Reset point total to 0 on game initialization
+	BCGame.SetGameCompletionMap();	// Called once at beginning of game to keep track of which word-lengths user has guessed
 
 	bool bPlayAgain = false; 
 	do {
@@ -46,7 +48,8 @@ int main()							// Entry point for our application
 void PrintIntroAndSetWord() // Introduce game and set word
 {
 	PrintGameTitlePicture();
-	InitializeWord();
+	if (!BCGame.GetEnterBonusRound()) { InitializeWord(); }
+	else { InitializeWord(BCGame.GetBonusWordLength()); }
 	PrintGameDirections(); 
 	std::cout << BCGame.GetHiddenWord() << "\n";
 	std::cout << std::endl;
@@ -75,7 +78,13 @@ void InitializeWord()								// Get the current word length and set the word (an
 	int32 WordLength = BCGame.GetCurrentWordLength();
 	BCGame.SetHiddenWordAndLength(WordLength);
 	BCGame.SetPointMaps(BCGame.GetHiddenWord());
-	BCGame.SetGameCompletionMap();
+	return;
+}
+
+void InitializeWord(int32 number)
+{
+	BCGame.SetHiddenWordAndLength(number);
+	BCGame.SetPointMaps(BCGame.GetHiddenWord());
 	return;
 }
 
@@ -158,7 +167,7 @@ bool CheckToContinuePlay()												// Check for correct conditions to continu
 {
 	bool bPositivePoints = (BCGame.GetMyPoints() > 0);					// TODO make calculation for more robust check for negative value
 	bool bGameIsWon = BCGame.IsGameWon();
-	if (bPositivePoints && BCGame.GetCurrentWordLength() <= 8)	
+	if (bPositivePoints && BCGame.GetCurrentWordLength() <= BCGame.GetMaxWordLength())	
 	{
 		PrintRoundSummary();
 		std::cout << "On to the next word? (Y/n) ";
@@ -166,14 +175,28 @@ bool CheckToContinuePlay()												// Check for correct conditions to continu
 	}
 	else					
 	{
-		if (bGameIsWon && bPositivePoints) { PrintGameWinSummary();; }
-		else { PrintGameLossSummary(bPositivePoints); }
-		if (AskToKeepPlaying()) {
-			BCGame.ResetPlayerPointTotal();
-			BCGame.ResetCurrentWordLength();
-			return true;
+		if (bGameIsWon && bPositivePoints) 
+		{ 
+			PrintGameWinSummary();
+			if (BCGame.GetRestartAfterBonus())
+			{
+				BCGame.ResetPlayerPointTotal();
+				BCGame.ResetCurrentWordLength();
+				return true;
+			}
+			else if (!BCGame.GetRestartAfterBonus()) { return false; }
+			else if (BCGame.GetEnterBonusRound()) { return true; }
+			else { return false; }
 		}
-		else { return false; }
+		else { 
+			PrintGameLossSummary(bPositivePoints);
+			if (AskToKeepPlaying()) {
+				BCGame.ResetPlayerPointTotal();
+				BCGame.ResetCurrentWordLength();
+				return true;
+			}
+			else { return false; }
+		}
 	}
 }
 
@@ -196,12 +219,30 @@ bool AskToKeepPlaying()									// Gets a player response and interprets it to p
 
 void PrintGameWinSummary()
 {
-	std::cout << "Final points: " << BCGame.GetMyPoints() << std::endl;
-	std::cout << std::endl;
-	std::cout << "=====================================\n";
-	std::cout << "YOU WON THE GAME! CONGRATULATIONS!!!!\n";
-	std::cout << "=====================================\n\n";
-	std::cout << "Would you like to restart? (Y/n) \n";
+	if (!BCGame.GetEnterBonusRound()) {
+		std::cout << "Final points: " << BCGame.GetMyPoints() << std::endl;
+		std::cout << std::endl;
+		std::cout << "=====================================\n";
+		std::cout << "YOU WON THE GAME! CONGRATULATIONS!!!!\n";
+		std::cout << "=====================================\n\n";
+		std::cout << "Would you like to enter the bonus round? (Y/n) \n";
+		FText Response = "";
+		std::getline(std::cin, Response);
+		BCGame.SetEnterBonusRound((Response[0] == 'Y' || Response[0] == 'y' || Response == ""));
+	}
+	else
+	{
+		BCGame.SetCompleteBonusRound(true);
+		std::cout << "Final points: " << BCGame.GetMyPoints() << std::endl;
+		std::cout << std::endl;
+		std::cout << "========================================\n";
+		std::cout << "AMAZING! YOU COMPLETED THE BONUS ROUND!!\n";
+		std::cout << "========================================\n\n";
+		std::cout << "You destroyed my game! Would you like to restart? (Y/n)";
+		FText Response = "";
+		std::getline(std::cin, Response);
+		BCGame.SetRestartAfterBonus((Response[0] == 'Y' || Response[0] == 'y' || Response == ""));
+	}
 	return;
 }
 

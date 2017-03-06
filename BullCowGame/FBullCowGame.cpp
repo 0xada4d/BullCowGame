@@ -13,6 +13,7 @@ FBullCowGame::FBullCowGame() { Reset(); }										// Does the job of the constr
 
 int32 FBullCowGame::GetMinWordLength() const { return MinWordLength; }
 int32 FBullCowGame::GetMaxWordLength() const { return MaxWordLength; }
+int32 FBullCowGame::GetBonusWordLength() const { return BonusWordLength; }
 int32 FBullCowGame::GetCurrentWordLength() const { return CurrentWordLength; }
 int32 FBullCowGame::GetMaxTries() const { return GameMaxTries; }
 int32 FBullCowGame::GetCurrentTry() const { return MyCurrentTry; }
@@ -21,15 +22,20 @@ int32 FBullCowGame::GetMyPoints() const { return PlayerPointTotal; }
 FString FBullCowGame::GetGameHelper() const { return GameHelper; }
 FString FBullCowGame::GetHiddenWord() const { return MyHiddenWord; }			// For testing only
 bool FBullCowGame::IsWordGuessed() const { return bWordIsWon; }
+bool FBullCowGame::GetEnterBonusRound() { return EnterBonusRound; }
+bool FBullCowGame::GetCompleteBonusRound() { return CompleteBonusRound; }
+bool FBullCowGame::GetRestartAfterBonus() { return RestartAfterBonus; }
 
-bool FBullCowGame::IsGameWon()									// Check all values in GameCompletionMap to determine if game is won
+bool FBullCowGame::IsGameWon()									// Check all values in GameCompletionMap
 {
-	for (int32 i = MinWordLength; i <= MaxWordLength; i++)
+	for (int32 i = MinWordLength; i <= MaxWordLength; i++)		
 	{
-		if (!GameCompletionMap[i]) { return false; }
+		if (!GameCompletionMap[i]) { return false; }			// If any value is false, game is not won
 	}
 	return true;
 }
+
+
 
 void FBullCowGame::SetHiddenWordAndLength(int32 WordLength)						// Maps number to vector, then randomly chooses word from vector
 {
@@ -41,12 +47,13 @@ void FBullCowGame::SetHiddenWordAndLength(int32 WordLength)						// Maps number 
 		{ 5, { "weird", "tramp", "turns", "crash", "month", "steak", "horse", "crazy", "jumps", "snead" } },
 		{ 6, { "planet", "ruined", "swipes", "county", "biomes", "racing", "mexico", "jockey", "hijack", "jumble" } },
 		{ 7, { "talking", "calzone", "parking", "squirmy", "country", "jukebox", "mexican", "wackjob", "subject", "quicker" } },
-		{ 8, { "muskoxen", "quadplex", "abjuring", "humpback", "chipmunk", "quackery", "hijacked", "jumbling", "longjump", "jackfish" } }
+		{ 8, { "muskoxen", "quadplex", "abjuring", "humpback", "chipmunk", "quackery", "hijacked", "jumbling", "longjump", "jackfish" } },
+		{ BonusWordLength, { "dermatoglyphics", "hydropneumatics", "misconjugatedly", "uncopyrightable" } }
 	};
 
-	std::vector<FString> ChosenNumberVector = WordLengthToWord[WordLength]; // User's number picks the word set
-	int32 RandomChoice = rand() % ChosenNumberVector.size();				// Create a random number to be used to select word from set
-	MyHiddenWord = ChosenNumberVector[RandomChoice];						// Pick the word from the set
+	std::vector<FString> ChosenNumberVector = WordLengthToWord[WordLength]; // CurrentWordLength dictates the word set
+	int32 RandomNumber = rand() % ChosenNumberVector.size();				// Create a random number to be used to select word from set
+	MyHiddenWord = ChosenNumberVector[RandomNumber];						// Pick the word from the set
 	return;
 }
 
@@ -61,11 +68,26 @@ void FBullCowGame::SetPointMaps(FString HiddenWord)  // Takes in the HiddenWord 
 
 void FBullCowGame::SetGameCompletionMap()
 {
-	for (int32 i = MinWordLength; i <= MaxWordLength; i++)
-	{
-		GameCompletionMap[i] = false;
-		return;
-	}
+	for (int32 i = MinWordLength; i <= MaxWordLength; i++) { GameCompletionMap[i] = false; }
+	return;
+}
+
+void FBullCowGame::SetEnterBonusRound(bool Response) 
+{
+	EnterBonusRound = Response;
+	return;
+}
+
+void FBullCowGame::SetCompleteBonusRound(bool Response)
+{
+	CompleteBonusRound = Response;
+	return;
+}
+
+void FBullCowGame::SetRestartAfterBonus(bool Response)
+{
+	RestartAfterBonus = Response;
+	return;
 }
 
 void FBullCowGame::AddPoints(int32 amount)  // Adds specified amount to PlayerPointTotal
@@ -84,7 +106,7 @@ void FBullCowGame::SetMaxTries()
 { 
 	TMap<int32, int32> WordLengthToMaxTries
 	{ 
-		{3, 6}, {4, 10}, {5, 12}, {6, 14}, {7, 18}, {8, 22}
+		{3, 6}, {4, 10}, {5, 12}, {6, 14}, {7, 18}, {8, 22}, {15, 25}
 	};
 	GameMaxTries = WordLengthToMaxTries[HiddenWordLength];
 	return;
