@@ -3,15 +3,17 @@ This is the console exe that makes use of the BullCow class
 This acts as the view in a MVC pattern, and is responsible for all
 user interaction. For game logic see the FBullCowGame class.
 */
-
+#pragma once
 #include <iostream>
 #include <string>
 #include <ctime>
 #include "FBullCowGame.h"
 
+// To make syntax Unreal friendly
 using FText = std::string;
 using int32 = int; 
 
+// Function prototypes as outside a class
 void PrintGameTitlePicture();
 void PrintGameDirections();
 void PrintIntroAndSetWord();
@@ -26,7 +28,7 @@ FText GetValidGuess();
 bool AskToKeepPlaying();
 bool CheckToContinuePlay(); 
 
-FBullCowGame BCGame;				// Instantiate a new game
+FBullCowGame BCGame;				// Instantiate a new game which we reuse across plays
 
 int main()							// Entry point for our application
 {
@@ -130,7 +132,7 @@ void PrintGuessSummary(FBullCowCount BullCowCount)							// Shows Player the num
 	return;
 }
 
-FText GetValidGuess()														// Makes sure player puts in a valid string for the game
+FText GetValidGuess()						// Makes sure player puts in a valid string for the game
 {
 	FText Guess = "";
 	EGuessStatus Status = EGuessStatus::Invalid_Status;
@@ -167,7 +169,7 @@ bool CheckToContinuePlay()												// Check for correct conditions to continu
 {
 	bool bPositivePoints = (BCGame.GetMyPoints() > 0);					// TODO make calculation for more robust check for negative value
 	bool bGameIsWon = BCGame.IsGameWon();
-	if (bPositivePoints && BCGame.GetCurrentWordLength() <= BCGame.GetMaxWordLength())	
+	if (bPositivePoints && BCGame.GetCurrentWordLength() <= BCGame.GetMaxWordLength())	// Keep going if user has positive points
 	{
 		PrintRoundSummary();
 		std::cout << "On to the next word? (Y/n) ";
@@ -175,22 +177,22 @@ bool CheckToContinuePlay()												// Check for correct conditions to continu
 	}
 	else					
 	{
-		if (bGameIsWon && bPositivePoints) 
+		if (bGameIsWon && bPositivePoints)							// Win check
 		{ 
 			PrintGameWinSummary();
-			if (BCGame.GetRestartAfterBonus())
-			{
+			if (BCGame.GetRestartAfterBonus())						// This is true if player wants to play after completing the bonus round
+			{														// Wont be true the first time player reaches endgame
 				BCGame.ResetPlayerPointTotal();
 				BCGame.ResetCurrentWordLength();
-				BCGame.SetEnterBonusRound(false);
+				BCGame.SetEnterBonusRound(false);					// Resetting variables to play a new game
 				BCGame.SetRestartAfterBonus(false);
 				return true;
 			}
-			else if (BCGame.GetEnterBonusRound()) { return true; }
+			else if (BCGame.GetEnterBonusRound()) { return true; }	// This is true if player has completed main game and wants to enter bonus round
 			else { return false; }
 		}
 		else { 
-			PrintGameLossSummary(bPositivePoints);
+			PrintGameLossSummary(bPositivePoints);					// Player loses if above check is false
 			if (AskToKeepPlaying()) {
 				BCGame.ResetPlayerPointTotal();
 				BCGame.ResetCurrentWordLength();
@@ -257,9 +259,3 @@ void PrintGameLossSummary(bool PositivePoints)
 	std::cout << "Would you like to restart? (Y/n) \n";
 	return;
 }
-
-
-
-
-
-

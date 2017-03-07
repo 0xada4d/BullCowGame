@@ -1,4 +1,4 @@
-
+#pragma once
 #include "FBullCowGame.h"
 #include <iostream>
 #include <map>

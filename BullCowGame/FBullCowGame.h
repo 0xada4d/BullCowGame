@@ -1,9 +1,15 @@
+/* 
+The game logic (no view code or direct user interaction)
+The game is a simple guess the word game based on Mastermind
+*/
+
 #pragma once
 #include <string>
 #include <map>
 #include <vector>
-#define TMap std::map
 
+// To make syntax Unreal friendly
+#define TMap std::map
 using FString = std::string; 
 using int32 = int;
 
